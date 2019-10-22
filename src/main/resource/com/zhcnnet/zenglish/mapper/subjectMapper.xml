@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+	"-//mybatis.org//DTD Config 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="subject">
+	<insert id="add" parameterType="Map">
+		insert into zsubject(subjectName,subjectDesc,subjectImgFile,subjectType,createDate,status) value(#{subjectName},#{subjectDesc},#{subjectImgFile},#{subjectType},now(),0)
+	</insert>
+	
+	<select id="queryAll" parameterType="Map" resultMap="queryAllMap">
+		select 
+			zs.subjectId,
+			zs.subjectName,
+			zs.subjectDesc,
+			zs.subjectType,
+			zs.createDate,
+			f.filePath as subjectImgFile,
+			(select count(zs2.subjectId) from zsubject as zs2 where 
+				<if test="subjectType!=null and subjectType!=''">
+					subjectType = #{subjectType} and
+				</if>
+				status=0
+			) as subjectCount 
+		from 
+			zsubject as zs
+			left join zfile as f on fileId=subjectImgFile
+		where 
+			<if test="subjectType!=null and subjectType!=''">
+				subjectType=#{subjectType} and
+			</if>
+			status=0
+		limit #{page},10
+	</select>
+	<resultMap type="QueryList" id="queryAllMap">
+		<id column="subjectCount" property="count"/>
+		<collection property="list" ofType="Map">
+			<id column="subjectId" property="subjectId"/>
+			<result column="subjectName" property="subjectName"/>
+			<result column="subjectDesc" property="subjectDesc"/>
+			<result column="subjectImgFile" property="subjectImgFile"/>
+			<result column="subjectType" property="subjectType"/>
+			<result column="createDate" property="createDate" javaType="String"/>
+		</collection>
+	</resultMap>
+	
+	<update id="revise">
+		update zsubject
+		<set>
+			<if test="subjectName != null and subjectName != ''">
+				subjectName = #{subjectName},
+			</if>
+			<if test="subjectDesc != null and subjectDesc != ''">
+				subjectDesc = #{subjectDesc},
+			</if>
+			<if test="subjectImgFile != null and subjectImgFile != ''">
+				subjectImgFile = #{subjectImgFile},
+			</if>
+			<if test="subjectType != null and subjectType != ''">
+				subjectType = #{subjectType},
+			</if>
+			<if test="status != null and status != ''">
+				status = 1,
+			</if>
+		</set>
+		where subjectId=#{subjectId}
+	</update>
+</mapper>

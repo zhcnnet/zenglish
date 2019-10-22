@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+	"-//mybatis.org//DTD Config 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="category">
+	<insert id="add" parameterType="Map">
+		insert into zsubject_category(scategoryName,scategoryDesc,subjectId,createDate) 
+		values(#{scategoryName},#{scategoryDesc},#{subjectId},now())
+	</insert>
+	<select id="list" parameterType="Map" resultMap="listMap">
+		select 
+			scategoryId,
+			scategoryName,
+			scategoryDesc,
+			createDate,
+  			(select count(scategoryId) from zsubject_category where subjectId=#{subjectId}) as scategoryCount
+ 		from 
+ 			zsubject_category 
+ 		where 
+ 			subjectId=#{subjectId} limit #{page},10
+	</select>
+	
+	<resultMap type="QueryList" id="listMap">
+		<id column="scategoryCount" property="count"/>
+		<collection property="list" ofType="Map">
+			<id column="scategoryId" property="scategoryId"/>
+			<result column="scategoryName" property="scategoryName"/>
+			<result column="scategoryDesc" property="scategoryDesc"/>
+			<result column="createDate" property="createDate" javaType="String"/>
+		</collection>
+	</resultMap>
+	
+	<update id="revise" parameterType="map">
+		update zsubject_category
+		<set>
+			<if test="scategoryName != null and scategoryName != ''">
+				scategoryName=#{scategoryName},
+			</if>
+			<if test="scategoryDesc != null and scategoryDesc != ''">
+				scategoryDesc=#{scategoryDesc},
+			</if>
+			<if test="subjectId != null and subjectId != ''">
+				subjectId=#{subjectId},
+			</if>
+			<if test="status != null and status !=''">
+				status=#{status}
+			</if>
+		</set>
+		 where scategoryId = #{scategoryId}
+	</update>
+</mapper>

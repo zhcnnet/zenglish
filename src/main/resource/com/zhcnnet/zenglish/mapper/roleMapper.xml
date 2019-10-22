@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+	"-//mybatis.org//DTD Config 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="role">
+	<insert id="add" parameterType="Map">
+		insert into zrole(roleName,roleValue,createDate,status) values(#{roleName},#{roleValue},now(),0);
+	</insert>
+
+	<update id="revise" parameterType="Map">
+		update zrole 
+		<set>
+			<if test="roleName != null and roleName !=''">
+				roleName = #{roleName},
+			</if>
+			<if test="roleValue != null and roleValue != ''">
+				roleValue = #{roleValue},
+			</if>
+			<if test="status != null and status !=''">
+				status = #{status},
+			</if>
+		</set>
+		 where roleId =#{roleId}
+	</update>
+	
+	<select id="queryAll" resultMap="queryAllMap" parameterType="Map">
+		select count(roleId) as roleCount,#{page} as page from zrole where status=0
+	</select>
+	
+	<select id="queryRole" resultType="Map" parameterType="Map">
+		select roleId,roleName,roleValue from zrole where status=0 limit #{page},10
+	</select>
+	
+	<resultMap type="QueryList" id="queryAllMap">
+		<result column="roleCount" property="count"/>
+		<collection property="list" column="page" select="queryRole" ofType="Map"/>
+	</resultMap>
+</mapper>

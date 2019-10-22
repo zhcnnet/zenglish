@@ -1,0 +1,30 @@
+server:
+    port: 8080
+    
+spring:
+    datasource:
+        driver-class-name: com.mysql.jdbc.Driver
+        data-source-class-name: com.alibaba.druid.pool.DruidDataSource
+        url: jdbc:mysql://127.0.0.1:3306/zenglish?useUnicode=true&characterEncoding=utf-8
+        username: root
+        password: root
+        initial-size: 1
+        max-active: 5
+        max-idle: 5
+        min-idle: 1
+        default-auto-commit: false
+    servlet:
+        multipart:
+            max-file-size: 50MB
+            max-request-size: 50MB
+
+mybatis: 
+    mapper-locations: classpath:com/zhcnnet/zenglish/mapper/*Mapper.xml
+    type-aliases-package: com.zhcnnet.zenglish.model
+    
+custom:
+    file-upload:
+        server:
+            local: D:/file/
+        aliyun: test
+    token-key: www.zhcnnet.com

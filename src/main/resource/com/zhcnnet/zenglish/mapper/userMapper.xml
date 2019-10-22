@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+	"-//mybatis.org//DTD Config 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="user">
+	<insert id="reg" parameterType="Map">
+		insert into zuser(userEmail,userPassword,userName,createDate) values(#{userEmail},#{userPassword},#{userName},now())
+	</insert>
+	
+	<select id="login" parameterType="Map" resultMap="loginMap">
+		select 
+			u.userId as userId,
+			u.userEmail as userEmail,
+			u.userName as userName,
+			u.status as userStatus,
+			now() as loginDate,
+		  
+			r.roleId as roleId,
+			r.roleName as roleName,
+			r.roleValue as roleValue,
+			r.status as roleStatus
+		  	
+			from  zuser as u
+		  
+			left join zuser_role as ur on ur.userId = u.userId
+			left join zrole as r on ur.roleId = r.roleId 
+		
+		where 
+		<if test="userId==null or userId==''">
+			u.userEmail=#{userEmail} and u.userPassword=#{userPassword}
+		</if>
+		<if test="userId!=null and userId!=''">
+			u.userId=#{userId}
+		</if>
+		and u.status=0 and (ur.status =0 or isnull(ur.status))
+	</select>
+	<resultMap type="Login" id="loginMap">
+		<id column="userId"/>
+		<association property="user">
+			<id column="userId" property="userId"/>
+			<result column="userEmail" property="userEmail"/>
+			<result column="userName" property="userName"/>
+			<result column="userStatus" property="status"/>
+			<result column="loginDate" property="loginDate" javaType="String"/>
+		</association>
+		<collection property="roles" ofType="Map">
+			<id column="roleId" property="roleId"/>
+			<result column="roleName" property="roleName"/>
+			<result column="roleValue" property="roleValue"/>
+			<result column="roleStatus" property="status"/>
+		</collection>
+	</resultMap>
+	
+	<insert id="loginRecord" parameterType="Map">
+		insert into zuser_login(loginDevice,loginDate,userId) 
+		select #{loginDevice} as loginDevice,now() as loginDate,userId from zuser where userEmail=#{userEmail} and userPassword=#{userPassword}
+	</insert>
+	
+	<insert id="setRole" parameterType="Map">
+		insert into zuser_role(userId,roleId,createDate,status) value(#{userId},#{roleId},now(),0)
+	</insert>
+	
+	<!-- ==================================start=============================================== -->
+	<select id="queryAll" parameterType="Map" resultMap="queryAllMap">
+		select 
+			count(u.userId) as userCount,
+			#{userEmail} as e,
+			#{page} as p,
+			#{roleId} as rId
+		from zuser as u
+		<if test="roleId!='' and roleId!=null">
+			left join zuser_role as ur on ur.userId = u.userId
+		</if>
+		<where>
+			<if test="userEmail!='' and userEmail!=null">
+				and u.userEmail like CONCAT('%',#{userEmail},'%')
+			</if>
+			<if test="roleId!='' and roleId!=null">
+				and ur.roleId = #{roleId}
+			</if>
+		</where>
+		
+	</select>
+	<resultMap type="QueryList" id="queryAllMap">
+		<id column="userCount" property="count"/>
+		<collection property="list" column="{userEmail=e,page=p,roleId=rId}" ofType="Map" select="queryList" />
+	</resultMap>
+	
+	<select id="queryList" parameterType="Map" resultType="Map">
+		select 
+			u.userId,
+			u.userEmail,
+			u.userName,
+			u.createDate,
+			u.status
+		from zuser as u
+		<if test="roleId!='' and roleId!=null">
+			left join zuser_role as ur on ur.userId = u.userId
+		</if>
+		<where>
+			<if test="userEmail!='' and userEmail!=null">
+				and u.userEmail like CONCAT('%',#{userEmail},'%')
+			</if>
+			<if test="roleId!='' and roleId!=null">
+				and ur.roleId = #{roleId}
+			</if>
+		</where>
+		limit #{page},10
+	</select>
+	
+	<!-- ==================================end================================================= -->
+	<update id="revise" parameterType="Map">
+		update zuser 
+		<set>
+			<if test="userEmail!='' and userEmail!=null">
+				userEmail=#{userEmail},
+			</if>
+			<if test="userPassword!='' and userPassword!=null">
+				userPassword=#{userPassword},
+			</if>
+			<if test="userName!='' and userName!=null">
+				userName=#{userName},
+			</if>
+			<if test="status!='' and status!=null">
+				status=#{status},
+			</if>
+		</set>
+		where userId = #{userId}
+	</update>
+</mapper>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+	"-//mybatis.org//DTD Config 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="word">
+	<insert id="add" parameterType="Map" keyProperty="wordId" keyColumn="wordId" useGeneratedKeys="true">
+		insert into zword(wordCN,wordEN,wordPS,wordFile,createDate) 
+		value(#{wordCN},#{wordEN},#{wordPS},#{wordFile},now())
+	</insert>
+	<select id="list" parameterType="map" resultMap="listMap">
+		select 
+			w.wordId,
+			w.wordCN,
+			w.wordEN,
+			w.wordPS,
+			f.filePath as wordFile,
+			(select count(wordId) from zword where status=0) as wordCount,
+			w.createDate
+		from zword as w
+			left join zfile as f on f.fileId=w.wordFile
+		where w.status=0 
+		limit #{page},10
+	</select>
+	
+	<resultMap type="QueryList" id="listMap">
+		<id column="wordCount" property="count"/>
+		<collection property="list" ofType="Map">
+			<id column="wordId" property="wordId"/>
+			<result column="wordCN" property="wordCN"/>
+			<result column="wordEN" property="wordEN"/>
+			<result column="wordPS" property="wordPS"/>
+			<result column="wordFile" property="wordFile"/>
+			<result column="createDate" property="createDate" javaType="String"/>
+		</collection>
+	</resultMap>
+	
+	<update id="revise" parameterType="Map">
+		update zword 
+		<set>
+			<if test="wordCN !=null and wordCN !=''">
+				wordCN=#{wordCN},
+			</if>
+			<if test="wordEN !=null and wordEN !=''">
+				wordEN=#{wordEN},
+			</if>
+			<if test="wordPS !=null and wordPS !=''">
+				wordPS=#{wordPS},
+			</if>
+			<if test="wordFile !=null and wordFile !=''">
+				wordFile=#{wordFile},
+			</if>
+			<if test="status != null and status !=''">
+				status=#{status},
+			</if>
+		</set>
+		where wordId=#{wordId}
+	</update>
+</mapper>
