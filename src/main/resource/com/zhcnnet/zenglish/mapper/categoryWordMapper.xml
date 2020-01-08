@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+	"-//mybatis.org//DTD Config 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="categoryWord">
+	<insert id="add" parameterType="Map" keyProperty="cwordId" keyColumn="cwordId" useGeneratedKeys="true">
+		insert into zcategory_word(wordId,scategoryId,status)
+		select w.wordId,sc.scategoryId,0 as status from zsubject_category as sc,zword as w 
+		where 
+			sc.scategoryId = #{scategoryId} 
+			and w.wordId=#{wordId} 
+			and sc.status = 0 
+			and w.status = 0
+	</insert>
+	
+	<select id="list" parameterType="Map" resultMap="listMap">
+		select 
+			w.wordId,
+			w.wordCN,
+			w.wordEN,
+			w.wordPS,
+			f.filePath as wordFile,
+			(select count(cwordId) from zcategory_word where scategoryId = 2) as wordCount 
+		from 
+			zcategory_word as cw
+			left join zword as w on w.wordId = cw.wordId
+			left join zfile as f on f.fileId = w.wordFile
+		where 
+			cw.scategoryId = #{scategoryId}
+		limit #{page},10
+	</select>
+	
+	
+	<resultMap type="QueryList" id="listMap">
+		<id column="wordCount" property="count"/>
+		<collection property="list" ofType="Map">
+			<id column="wordId" property="wordId"/>
+			<result column="wordCN" property="wordCN"/>
+			<result column="wordEN" property="wordEN"/>
+			<result column="wordPS" property="wordPS"/>
+			<result column="wordFile" property="wordFile"/>
+		</collection>
+	</resultMap>
+	<update id="revise" parameterType="map">
+		update zcategory_word 
+		<set>
+			<if test="wordId != null and wordId != ''">
+				wordId = #{wordId},
+			</if>
+			<if test="scategoryId != null and scategoryId != ''">
+				scategoryId = #{scategoryId},
+			</if>
+			<if test="status !=null and status != ''">
+				status = #{status},
+			</if>
+		</set>
+		where cwordId = 1
+	</update>
+</mapper>

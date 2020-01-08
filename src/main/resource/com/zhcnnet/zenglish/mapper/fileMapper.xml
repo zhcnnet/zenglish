@@ -3,7 +3,7 @@
 	"-//mybatis.org//DTD Config 3.0//EN" 
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="file">
-	<insert id="add" parameterType="Map">
+	<insert id="add" parameterType="Map" keyProperty="fileId" keyColumn="fileId" useGeneratedKeys="true">
 		insert into zfile(filePath,fileName,fileType) values(#{filePath},#{fileName},#{fileType})
 	</insert>
 </mapper>

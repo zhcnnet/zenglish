@@ -37,7 +37,7 @@ public class FileServiceImpl implements FileService
 		
 		int r = fileDao.add(prms);
 		Result result = new Result();
-		result.setData(path);
+		result.setData(prms);
 		result.setStatus(r>0?Result.STATUS_SUCCESS:Result.STATUS_LOSER);
 		result.setMessage(r>0?"上传成功":"上传失败");
 		return result;

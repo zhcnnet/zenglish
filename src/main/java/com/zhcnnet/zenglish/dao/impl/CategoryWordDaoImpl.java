@@ -5,24 +5,35 @@ import java.util.Map;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import com.zhcnnet.zenglish.dao.FileDao;
+import com.zhcnnet.zenglish.dao.CategoryWordDao;
+import com.zhcnnet.zenglish.model.QueryList;
 
-@Service
-public class FileDaoImpl implements FileDao
+public class CategoryWordDaoImpl implements CategoryWordDao
 {
 	@Autowired
 	private SqlSessionFactory sessionFactory;
-
+	
 	@Override
 	public int add(Map<String, Object> prms) 
 	{
 		SqlSession session = sessionFactory.openSession();
-		session.insert("file.add",prms);
+		session.insert("categoryWord.add",prms);
 		session.commit();
 		session.close();
-		return Integer.parseInt(prms.get("fileId").toString());
+		return Integer.parseInt(prms.get("cwordId").toString());
+	}
+
+	@Override
+	public QueryList list(Map<String, Object> prms) 
+	{
+		return null;
+	}
+
+	@Override
+	public int revise(Map<String, Object> prms) 
+	{
+		return 0;
 	}
 
 }
