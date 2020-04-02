@@ -63,15 +63,13 @@ public class RedisConfig
 		JedisPoolingClientConfigurationBuilder jedisClientConfigurationBuilder = (JedisPoolingClientConfigurationBuilder) JedisClientConfiguration.builder();
 		jedisClientConfigurationBuilder.poolConfig(getJedisPoolConfig());
 		
-		JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory(getRedisStandaloneConfiguration(),jedisClientConfigurationBuilder.build());
-		
-		return jedisConnectionFactory;
+		return new JedisConnectionFactory(getRedisStandaloneConfiguration(),jedisClientConfigurationBuilder.build());
 	}
 	
 	@Bean
     public RedisTemplate<String,Object> redisTemplate(JedisConnectionFactory factory)
 	{
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        RedisTemplate<String, Object> template = new RedisTemplate<String, Object>();
         template.setConnectionFactory(factory);
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new StringRedisSerializer());
